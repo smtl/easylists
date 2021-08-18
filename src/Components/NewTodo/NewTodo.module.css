@@ -1,0 +1,13 @@
+.NewTodo {
+  width: 100%;
+}
+
+.NewTodo input {
+  width: 100%;
+}
+
+.NewTodo button {
+  margin: 0 auto;
+  margin-top: 10px;
+  display: block;
+}

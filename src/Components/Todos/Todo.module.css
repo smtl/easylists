@@ -1,0 +1,37 @@
+.delete {
+  content: "\274C";
+  display: none;
+  color: rgb(179, 179, 179);
+  padding: 0 0 2px 5px;
+  vertical-align: middle;
+  font-size: xx-small;
+  cursor: pointer;
+}
+
+.show {
+  display: inline-block;
+}
+
+.todo.done li {
+  text-decoration: line-through;
+  color: rgb(179, 179, 179);
+  display: inline;
+}
+
+.todo li {
+  display: inline;
+}
+
+.todo li:before {
+  content: "\2610";
+  display: inline-block;
+  color: rgb(179, 179, 179);
+  padding: 0 4px 0 0;
+}
+
+.todo.done li:before {
+  content: "\2713";
+  display: inline-block;
+  color: rgb(179, 179, 179);
+  padding: 0 4px 0 0;
+}

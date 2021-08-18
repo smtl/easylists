@@ -1,0 +1,22 @@
+.newproject {
+  font-family: "Rubik", sans-serif;
+}
+
+.newproject ul {
+  text-align: center;
+}
+
+.newproject li {
+  list-style-type: none;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  border-radius: 15px;
+  border: 1px solid;
+}
+
+.newproject input {
+  padding-left: 6px;
+  margin-left: 50px;
+}

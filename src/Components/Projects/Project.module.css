@@ -1,0 +1,30 @@
+.project {
+  font-family: "Rubik", sans-serif;
+  grid-template-areas: "name settings";
+  grid-template-columns: auto 35px;
+  grid-gap: 0px;
+  display: grid;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.project:hover {
+  border-radius: 200px;
+  border: 1px solid;
+  border-width: 100%;
+}
+
+.project li {
+  list-style-type: none;
+  grid-area: name;
+  padding: 10px;
+  padding: 10px 0 10px 0;
+  margin: 10px;
+}
+
+.project .settings {
+  grid-area: settings;
+  text-align: center;
+  align-self: center;
+  font-size: 18px;
+}
