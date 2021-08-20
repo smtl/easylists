@@ -126,7 +126,7 @@ function App() {
           ...todo,
           key: Math.random().toString(36).replace("0.", "id"),
           createdDate: new Date(),
-          done: todo.done ? "false" : "true",
+          done: todo.done ? false : true,
           completedDate: todo.done ? null : new Date(),
         },
         ...updatedTodos,
