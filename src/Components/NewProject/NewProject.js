@@ -39,7 +39,7 @@ const NewProject = (props) => {
     return (
       <div className={styles.newproject}>
         <input
-          maxlength="17"
+          maxLength="17"
           type="text"
           autoFocus
           onChange={NewProjectNameHandler}
