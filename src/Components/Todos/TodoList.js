@@ -1,55 +1,23 @@
 import styles from "./TodoList.module.css";
-import Todo from "./Todo.js";
 import NewTodo from "../NewTodo/NewTodo";
+import UndoneTodos from "./UndoneTodos";
+import DoneTodos from "./DoneTodos";
 
 const TodoList = (props) => {
-  const filteredUndoneTodos = props.todos
-    .filter((todo) => todo.project === props.activeProject && !todo.done)
-    .sort((a, b) => {
-      return (
-        new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
-      );
-    });
-
-  const filteredDoneTodos = props.todos
-    .filter((todo) => todo.project === props.activeProject && todo.done)
-    .sort((a, b) => {
-      return (
-        new Date(a.completedDate).getTime() -
-        new Date(b.completedDate).getTime()
-      );
-    })
-    .reverse();
-
   return (
     <div className={styles.content}>
-      {filteredUndoneTodos.length < 1 && <p>Nothing left to do!</p>}
-      <ul>
-        {filteredUndoneTodos.map((todo) => {
-          return (
-            <Todo
-              key={todo.key}
-              completeTodo={props.completeTodo}
-              todo={todo}
-            />
-          );
-        })}
-      </ul>
+      <UndoneTodos
+        activeProject={props.activeProject}
+        todos={props.todos}
+        completeTodo={props.completeTodo}
+      />
       <NewTodo addNewTodo={props.addNewTodo} />
-      <ul>
-        {filteredDoneTodos.map((todo) => {
-          return (
-            <div>
-              <Todo
-                key={todo.key}
-                completeTodo={props.completeTodo}
-                todo={todo}
-                deleteTodo={props.deleteTodo}
-              />
-            </div>
-          );
-        })}
-      </ul>
+      <DoneTodos
+        activeProject={props.activeProject}
+        todos={props.todos}
+        completeTodo={props.completeTodo}
+        deleteTodo={props.deleteTodo}
+      />
     </div>
   );
 };
