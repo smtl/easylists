@@ -28,9 +28,7 @@ const NewTodo = (props) => {
         onChange={onChangeHandler}
         onKeyDown={keyUpHandler}
       />
-      <button s onClick={addNewTodoHandler}>
-        Add to List
-      </button>
+      <button onClick={addNewTodoHandler}>Add to List</button>
     </div>
   );
 };
