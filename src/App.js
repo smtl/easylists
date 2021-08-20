@@ -105,12 +105,12 @@ function App() {
   const addNewTodo = (todoText) => {
     setTodos((prevState) => {
       return [
+        ...prevState,
         {
           key: Math.random().toString(36).replace("0.", "id"),
           text: todoText,
           project: activeProject,
         },
-        ...prevState,
       ];
     });
   };
