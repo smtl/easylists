@@ -28,8 +28,8 @@ const TodoList = (props) => {
         {filteredUndoneTodos.map((todo) => {
           return (
             <Todo
-              completeTodo={props.completeTodo}
               key={todo.key}
+              completeTodo={props.completeTodo}
               todo={todo}
             />
           );
@@ -41,9 +41,8 @@ const TodoList = (props) => {
           return (
             <div>
               <Todo
-                className={styles.todo}
-                completeTodo={props.completeTodo}
                 key={todo.key}
+                completeTodo={props.completeTodo}
                 todo={todo}
                 deleteTodo={props.deleteTodo}
               />
