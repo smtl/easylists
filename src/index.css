@@ -7,7 +7,10 @@
   --ink-done: #978f63;
   --binding: #7a2e2a;
   --binding-ink: #f6e3c4;
-  --desk: #d3d9e1;
+  --desk: #6b4426;
+  --desk-scrim: rgba(0, 0, 0, 0);
+  --action-complete: #3f7a52;
+  --action-delete: #b3261e;
   --focus: #2f6fd6;
 
   --line: 44px;
@@ -31,6 +34,7 @@ body {
 }
 
 body {
+  position: relative;
   background: var(--desk);
   color: var(--ink);
   font-family: var(--font-body);
@@ -39,15 +43,34 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* A photo of a wood desk behind the pad, out of focus, so the pad on top
+   reads as the only thing in sharp focus. Overscanned past the viewport
+   edges so the blur has no hard border to soften against. The scrim
+   darkens the photo in dark mode without needing a second image. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -60px;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(var(--desk-scrim), var(--desk-scrim)),
+    url("/desk.jpg");
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+}
+
 /* The pad stays paper-coloured; only the desk around it darkens */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --desk: #1c2230;
+    --desk: #1a120c;
+    --desk-scrim: rgba(0, 0, 0, 0.55);
   }
 }
 
 :root[data-theme="dark"] {
-  --desk: #1c2230;
+  --desk: #1a120c;
+  --desk-scrim: rgba(0, 0, 0, 0.55);
 }
 
 button,
