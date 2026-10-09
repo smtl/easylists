@@ -1,3 +1,23 @@
-.sidebar {
-  grid-area: sidebar;
+/* The pad's glued binding, with one tab per list */
+.binding {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--binding);
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 0 0;
+}
+
+.tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin: 0;
+  padding: 0 8px;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }

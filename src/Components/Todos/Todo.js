@@ -1,29 +1,63 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./Todo.module.css";
 
+const STRIKE_MS = 360;
+
+const prefersReducedMotion = () =>
+  window.matchMedia &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 const Todo = (props) => {
-  const [showDelete, setShowDelete] = useState(false);
+  const { todo } = props;
+  const [striking, setStriking] = useState(false);
+  const timer = useRef(null);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const toggleHandler = () => {
+    if (striking) {
+      return;
+    }
+    // Cross the item off where it is, then let it drop to the done pile
+    if (!todo.done && !prefersReducedMotion()) {
+      setStriking(true);
+      timer.current = setTimeout(() => props.completeTodo(todo), STRIKE_MS);
+    } else {
+      props.completeTodo(todo);
+    }
+  };
+
+  const classes = [
+    styles.todo,
+    todo.done ? styles.done : "",
+    striking ? styles.striking : "",
+  ].join(" ");
 
   return (
-    <div
-      className={`${styles.todo} ${props.todo.done && styles.done}`}
-      onMouseEnter={() => setShowDelete(true)}
-      onMouseLeave={() => setShowDelete(false)}
-    >
-      <div className={styles.todo_container}>
-        <li onClick={() => props.completeTodo(props.todo)}>
-          {props.todo.text}
-        </li>
-        {props.todo.done && (
-          <span
-            onClick={() => props.deleteTodo(props.todo)}
-            className={`${styles.delete} ${showDelete && styles.show}`}
-          >
-            {"\u274C"}
-          </span>
-        )}
-      </div>
-    </div>
+    <li className={classes}>
+      <button
+        type="button"
+        className={styles.toggle}
+        role="checkbox"
+        aria-checked={todo.done || striking}
+        onClick={toggleHandler}
+      >
+        <span className={styles.box} aria-hidden="true" />
+        <span className={styles.text}>
+          <span className={styles.stroke}>{todo.text}</span>
+        </span>
+      </button>
+      {todo.done && (
+        <button
+          type="button"
+          className={styles.delete}
+          aria-label={`Delete ${todo.text}`}
+          onClick={() => props.deleteTodo(todo)}
+        >
+          {"\u00D7"}
+        </button>
+      )}
+    </li>
   );
 };
 

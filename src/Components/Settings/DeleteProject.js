@@ -1,22 +1,34 @@
-import { useState } from "react";
+import styles from "./SettingsController.module.css";
 
 const DeleteProject = (props) => {
-  const [isDeleted, setIsDeleted] = useState(false);
+  const items =
+    props.itemCount === 1 ? "1 item" : `${props.itemCount} items`;
+  const message =
+    props.itemCount === 0
+      ? `Delete “${props.projectName}”? It has no items.`
+      : `Deleting “${props.projectName}” also deletes its ${items}.`;
 
-  const onDeleteProjectHandler = () => {
-    setIsDeleted(true);
-    props.onDeleteProject();
-  };
-
-  if (isDeleted) {
-    return <p>List deleted - select another list to continue</p>;
-  } else {
-    return (
-      <button onClick={onDeleteProjectHandler}>
-        Delete List and all List items
-      </button>
-    );
-  }
+  return (
+    <>
+      <p>{message}</p>
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.danger}
+          onClick={props.onDeleteProject}
+        >
+          Delete list
+        </button>
+        <button
+          type="button"
+          className={styles.secondary}
+          onClick={props.onClose}
+        >
+          Keep list
+        </button>
+      </div>
+    </>
+  );
 };
 
 export default DeleteProject;

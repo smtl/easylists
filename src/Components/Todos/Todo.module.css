@@ -1,37 +1,100 @@
-.delete {
-  content: "\274C";
-  display: none;
-  color: rgb(179, 179, 179);
-  padding: 0 0 2px 5px;
-  vertical-align: middle;
-  font-size: xx-small;
+.todo {
+  display: flex;
+  align-items: flex-start;
+  min-height: var(--line);
+}
+
+.toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
   cursor: pointer;
 }
 
-.show {
-  display: inline-block;
+/* The checkbox sits in the margin, left of the red line */
+.box {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--gutter);
+  height: var(--line);
 }
 
-.todo.done li {
-  text-decoration: line-through;
-  color: rgb(179, 179, 179);
-  display: inline;
+.box::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ink-soft);
+  border-radius: 4px;
 }
 
-.todo li {
-  display: inline;
+.text {
+  padding: 0 12px;
+  line-height: var(--line);
+  overflow-wrap: anywhere;
 }
 
-.todo li:before {
-  content: "\2610";
-  display: inline-block;
-  color: rgb(179, 179, 179);
-  padding: 0 4px 0 0;
+/* Ink stroke drawn through the words; grows from left to right */
+.stroke {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 56%;
+  background-size: 0 2px;
 }
 
-.todo.done li:before {
+.striking .stroke {
+  animation: strike 320ms ease-out forwards;
+}
+
+.done .stroke {
+  background-size: 100% 2px;
+}
+
+.done .text {
+  color: var(--ink-done);
+}
+
+.done .box::before {
   content: "\2713";
-  display: inline-block;
-  color: rgb(179, 179, 179);
-  padding: 0 4px 0 0;
+  border: 0;
+  width: auto;
+  height: auto;
+  color: var(--ink-done);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.delete {
+  flex: none;
+  width: var(--line);
+  height: var(--line);
+  margin-right: 6px;
+  border: 0;
+  background: none;
+  color: var(--ink-done);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.delete:hover {
+  color: var(--ink);
+  background: rgba(30, 43, 74, 0.08);
+}
+
+@keyframes strike {
+  from {
+    background-size: 0 2px;
+  }
+  to {
+    background-size: 100% 2px;
+  }
 }

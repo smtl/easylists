@@ -1,15 +1,72 @@
+:root {
+  --paper: #fdf5b5;
+  --rule: #a9c5e3;
+  --margin: #e17b7b;
+  --ink: #1e2b4a;
+  --ink-soft: #5b6580;
+  --ink-done: #978f63;
+  --binding: #7a2e2a;
+  --binding-ink: #f6e3c4;
+  --desk: #d3d9e1;
+  --focus: #2f6fd6;
+
+  --line: 44px;
+  --gutter: 56px;
+
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --font-hand: "Kalam", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
+
+  color-scheme: light;
+}
+
 * {
   box-sizing: border-box;
 }
 
-html {
-  font-family: sans-serif;
+html,
+body {
+  margin: 0;
+  min-height: 100%;
 }
 
 body {
-  margin: 40px;
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
-body {
-  margin: 40px;
+/* The pad stays paper-coloured; only the desk around it darkens */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --desk: #1c2230;
+  }
+}
+
+:root[data-theme="dark"] {
+  --desk: #1c2230;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: -3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

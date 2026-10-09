@@ -1,15 +1,38 @@
-.header {
-  grid-area: header;
+.title {
+  display: flex;
+  align-items: flex-end;
+  height: calc(var(--line) * 2);
+  padding-left: calc(var(--gutter) + 12px);
 }
 
-.box {
-  background-color: #444;
-  color: #fff;
-  border-radius: 5px;
-  padding: 20px;
-  font-size: 150%;
+.title h1 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: var(--line);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.header {
-  background-color: #999;
+.options {
+  flex: none;
+  width: var(--line);
+  height: var(--line);
+  margin-right: 6px;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.options[aria-pressed="true"] {
+  background: rgba(30, 43, 74, 0.1);
+  color: var(--ink);
 }

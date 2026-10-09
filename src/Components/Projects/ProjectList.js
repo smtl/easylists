@@ -4,21 +4,21 @@ import NewProject from "../NewProject/NewProject";
 
 const ProjectList = (props) => {
   return (
-    <div className={styles.sidebar}>
-      <ul>
+    <nav className={styles.binding} aria-label="Lists">
+      <ul className={styles.tabs}>
         {props.projects.map((project) => {
           return (
             <Project
               key={project.key}
               name={project.name}
+              active={project.name === props.activeProject}
               onSelect={props.onSelect}
-              onSettingsSelection={props.onSettingsSelection}
             />
           );
         })}
+        <NewProject addNewProject={props.addNewProject} />
       </ul>
-      <NewProject addNewProject={props.addNewProject} />
-    </div>
+    </nav>
   );
 };
 

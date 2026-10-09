@@ -1,4 +1,5 @@
 import Todo from "./Todo";
+import styles from "./TodoList.module.css";
 
 const UndoneTodos = (props) => {
   const filteredUndoneTodos = props.todos
@@ -10,22 +11,18 @@ const UndoneTodos = (props) => {
     });
 
   if (filteredUndoneTodos.length < 1) {
-    return <p>Nothing left to do!</p>;
-  } else {
-    return (
-      <ul>
-        {filteredUndoneTodos.map((todo) => {
-          return (
-            <Todo
-              key={todo.key}
-              completeTodo={props.completeTodo}
-              todo={todo}
-            />
-          );
-        })}
-      </ul>
-    );
+    return null;
   }
+
+  return (
+    <ul className={styles.items}>
+      {filteredUndoneTodos.map((todo) => {
+        return (
+          <Todo key={todo.key} completeTodo={props.completeTodo} todo={todo} />
+        );
+      })}
+    </ul>
+  );
 };
 
 export default UndoneTodos;

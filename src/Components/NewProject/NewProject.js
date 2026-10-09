@@ -5,49 +5,51 @@ const NewProject = (props) => {
   const [editingActive, setEditingActive] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
 
-  const newProjectHandler = () => {
-    setEditingActive(true);
+  const finish = (save) => {
+    const name = newProjectName.trim();
+    if (save && name.length > 0) {
+      props.addNewProject(name);
+    }
+    setEditingActive(false);
+    setNewProjectName("");
   };
 
-  const NewProjectNameHandler = (event) => {
-    setNewProjectName(event.target.value);
-  };
-
-  const AddNewProjectHandler = (event) => {
+  const keyDownHandler = (event) => {
     if (event.key === "Enter") {
-      if (newProjectName.length > 0) {
-        props.addNewProject(newProjectName);
-        setEditingActive(false);
-        setNewProjectName("");
-      }
+      finish(true);
     }
-
     if (event.key === "Escape") {
-      setEditingActive(false);
+      finish(false);
     }
   };
 
-  if (!editingActive) {
-    return (
-      <div className={styles.newproject}>
-        <ul>
-          <li onClick={newProjectHandler}>+</li>
-        </ul>
-      </div>
-    );
-  } else {
-    return (
-      <div className={styles.newproject}>
+  return (
+    <li className={styles.newproject}>
+      {editingActive ? (
         <input
-          maxLength="17"
+          aria-label="New list name"
+          placeholder="List name"
+          maxLength="30"
           type="text"
+          enterKeyHint="done"
           autoFocus
-          onChange={NewProjectNameHandler}
-          onKeyDown={AddNewProjectHandler}
-        ></input>
-      </div>
-    );
-  }
+          value={newProjectName}
+          onChange={(event) => setNewProjectName(event.target.value)}
+          onKeyDown={keyDownHandler}
+          onBlur={() => finish(true)}
+        />
+      ) : (
+        <button
+          type="button"
+          className={styles.add}
+          aria-label="New list"
+          onClick={() => setEditingActive(true)}
+        >
+          +
+        </button>
+      )}
+    </li>
+  );
 };
 
 export default NewProject;

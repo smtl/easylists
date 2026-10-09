@@ -1,25 +1,29 @@
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import styles from "./Project.module.css";
 
 const Project = (props) => {
-  const [showSettingsIcon, setShowSettingsIcon] = useState(false);
+  const tabRef = useRef(null);
+
+  // Keep the selected tab visible when the tab row scrolls sideways
+  useEffect(() => {
+    if (props.active && tabRef.current && tabRef.current.scrollIntoView) {
+      tabRef.current.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [props.active]);
 
   return (
-    <div
-      className={styles.project}
-      onMouseEnter={() => setShowSettingsIcon(true)}
-      onMouseLeave={() => setShowSettingsIcon(false)}
+    <li
+      ref={tabRef}
+      className={`${styles.tab} ${props.active ? styles.active : ""}`}
     >
-      <li onClick={() => props.onSelect(props.name)}>{props.name}</li>
-      {showSettingsIcon && (
-        <span
-          onClick={() => props.onSettingsSelection(props.name)}
-          className={styles.settings}
-        >
-          {"\u2699"}
-        </span>
-      )}
-    </div>
+      <button
+        type="button"
+        aria-current={props.active ? "page" : undefined}
+        onClick={() => props.onSelect(props.name)}
+      >
+        {props.name}
+      </button>
+    </li>
   );
 };
 

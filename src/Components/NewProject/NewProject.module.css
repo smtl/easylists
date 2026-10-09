@@ -1,22 +1,38 @@
 .newproject {
-  font-family: "Rubik", sans-serif;
+  flex: none;
+  display: flex;
+  align-items: center;
+  min-height: var(--line);
 }
 
-.newproject ul {
-  text-align: center;
-}
-
-.newproject li {
-  list-style-type: none;
-  padding: 10px;
-  margin: 10px;
-  border: 1px solid transparent;
+.add {
+  width: var(--line);
+  height: var(--line);
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  color: var(--binding-ink);
+  font-size: 26px;
+  line-height: 1;
   cursor: pointer;
-  border-radius: 15px;
-  border: 1px solid;
+}
+
+.add:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .newproject input {
-  padding-left: 6px;
-  margin-left: 50px;
+  width: 9.5em;
+  height: 34px;
+  margin: 0 4px 5px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.newproject input::placeholder {
+  color: var(--ink-soft);
 }

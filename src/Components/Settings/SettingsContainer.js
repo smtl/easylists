@@ -5,8 +5,10 @@ const SettingsContainer = (props) => {
   return (
     <div className={styles.content}>
       <DeleteProject
-        project={props.project}
+        projectName={props.projectName}
+        itemCount={props.itemCount}
         onDeleteProject={props.onDeleteProject}
+        onClose={props.onClose}
       />
     </div>
   );

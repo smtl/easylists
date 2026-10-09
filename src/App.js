@@ -88,14 +88,26 @@ const todos_static = [
   },
 ];
 
+const newKey = () => Math.random().toString(36).replace("0.", "id");
+
 function App() {
   const [todos, setTodos] = useStickyState(todos_static, "todos_sticky");
   const [projects, setProjects] = useStickyState(
     projects_static,
     "projects_sticky"
   );
-  const [activeProject, setActiveProject] = useState(projects_static[0].name);
+  const [savedActiveProject, setActiveProject] = useStickyState(
+    projects_static[0].name,
+    "active_project_sticky"
+  );
   const [settingsActive, setSettingsActive] = useState(false);
+
+  // Fall back to the first list if the saved one no longer exists
+  const activeProject = projects.some((p) => p.name === savedActiveProject)
+    ? savedActiveProject
+    : projects.length > 0
+    ? projects[0].name
+    : null;
 
   const projectSelectHandler = (projectName) => {
     setSettingsActive(false);
@@ -107,9 +119,12 @@ function App() {
       return [
         ...prevState,
         {
-          key: Math.random().toString(36).replace("0.", "id"),
+          key: newKey(),
           text: todoText,
           project: activeProject,
+          done: false,
+          createdDate: new Date(),
+          completedDate: null,
         },
       ];
     });
@@ -121,99 +136,93 @@ function App() {
         (todoItem) => todoItem.key !== todo.key
       );
 
-      const updatedTodoList = [
+      return [
         {
           ...todo,
-          key: Math.random().toString(36).replace("0.", "id"),
+          key: newKey(),
           createdDate: new Date(),
-          done: todo.done ? false : true,
+          done: !todo.done,
           completedDate: todo.done ? null : new Date(),
         },
         ...updatedTodos,
       ];
-
-      return updatedTodoList;
     });
   };
 
   const deleteTodo = (todo) => {
-    setTodos((prevState) => {
-      const updatedTodos = prevState.filter(
-        (todoItem) => todoItem.key !== todo.key
-      );
-
-      return updatedTodos;
-    });
+    setTodos((prevState) =>
+      prevState.filter((todoItem) => todoItem.key !== todo.key)
+    );
   };
 
   const addNewProject = (projectName) => {
     const existingProject = projects.find((p) => p.name === projectName);
-    if (existingProject) {
-      return;
-    }
-
-    setProjects((prevState) => {
-      return [
+    if (!existingProject) {
+      setProjects((prevState) => [
         ...prevState,
-        {
-          key: Math.random().toString(36).replace("0.", "id"),
-          name: projectName,
-        },
-      ];
-    });
-  };
-
-  const onSettingsSelection = (projectName) => {
-    setSettingsActive(true);
+        { key: newKey(), name: projectName },
+      ]);
+    }
+    // Open the list straight away, whether it's new or already exists
+    setSettingsActive(false);
     setActiveProject(projectName);
   };
 
-  const getProject = () => {
-    return projects.find((p) => p.name === activeProject);
-  };
-
   const onDeleteProject = () => {
-    const project = getProject();
-
-    setProjects((prevState) => {
-      const updatedProjects = prevState.filter((p) => p.key !== project.key);
-      return [...updatedProjects];
-    });
-
-    setTodos((prevState) => {
-      const updatedTodos = prevState.filter(
-        (todoItem) => todoItem.project !== project.name
-      );
-      return [...updatedTodos];
-    });
+    const remaining = projects.filter((p) => p.name !== activeProject);
+    setProjects(remaining);
+    setTodos((prevState) =>
+      prevState.filter((todoItem) => todoItem.project !== activeProject)
+    );
+    setSettingsActive(false);
+    setActiveProject(remaining.length > 0 ? remaining[0].name : null);
   };
+
+  const itemCount = todos.filter((t) => t.project === activeProject).length;
 
   return (
-    <div className={styles.wrapper}>
-      <Header>
-        {activeProject} {settingsActive ? "Settings" : "List"}
-      </Header>
-      <ProjectList
-        projects={projects}
-        onSelect={projectSelectHandler}
-        addNewProject={addNewProject}
-        onSettingsSelection={onSettingsSelection}
-      />
-      {settingsActive ? (
-        <SettingsContainer
-          projectName={activeProject}
-          project={() => getProject()}
-          onDeleteProject={onDeleteProject}
-        />
-      ) : (
-        <TodoList
-          addNewTodo={addNewTodo}
-          completeTodo={completeTodo}
-          deleteTodo={deleteTodo}
-          todos={todos}
+    <div className={styles.desk}>
+      <main className={styles.pad}>
+        <ProjectList
+          projects={projects}
           activeProject={activeProject}
+          onSelect={projectSelectHandler}
+          addNewProject={addNewProject}
         />
-      )}
+        <div className={styles.sheet}>
+          {activeProject ? (
+            <>
+              <Header
+                optionsActive={settingsActive}
+                onToggleOptions={() => setSettingsActive((s) => !s)}
+              >
+                {activeProject}
+              </Header>
+              {settingsActive ? (
+                <SettingsContainer
+                  projectName={activeProject}
+                  itemCount={itemCount}
+                  onDeleteProject={onDeleteProject}
+                  onClose={() => setSettingsActive(false)}
+                />
+              ) : (
+                <TodoList
+                  addNewTodo={addNewTodo}
+                  completeTodo={completeTodo}
+                  deleteTodo={deleteTodo}
+                  todos={todos}
+                  activeProject={activeProject}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              <Header>No lists yet</Header>
+              <p className={styles.empty}>Tap + above to start a list.</p>
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

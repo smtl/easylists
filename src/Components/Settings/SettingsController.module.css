@@ -1,4 +1,37 @@
 .content {
-  grid-area: content;
-  padding: 20px;
+  padding-left: calc(var(--gutter) + 12px);
+  padding-right: 16px;
+}
+
+.content p {
+  margin: 0;
+  line-height: var(--line);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 5px 0;
+  min-height: var(--line);
+}
+
+.actions button {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 17px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger {
+  border: 0;
+  background: #b3261e;
+  color: #fff;
+}
+
+.secondary {
+  border: 2px solid var(--ink);
+  background: transparent;
 }

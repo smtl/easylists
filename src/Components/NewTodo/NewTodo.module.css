@@ -1,14 +1,50 @@
-.NewTodo {
-  width: 100%;
+.newTodo {
+  display: flex;
+  align-items: center;
+  height: var(--line);
 }
 
-.NewTodo input {
-  width: 100%;
+.plus {
+  flex: none;
+  width: var(--gutter);
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 24px;
+  line-height: 1;
 }
 
-.NewTodo button {
-  margin: 0 auto;
-  margin-top: 10px;
-  display: block;
+.newTodo input {
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--line) - 2px);
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+}
+
+.newTodo input::placeholder {
+  color: var(--ink-soft);
+}
+
+.newTodo input:focus {
+  outline: none;
+}
+
+.newTodo:focus-within .plus {
+  color: var(--ink);
+}
+
+.save {
+  flex: none;
+  height: 34px;
+  margin-right: 10px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
 }
