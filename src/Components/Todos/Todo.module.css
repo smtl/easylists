@@ -1,7 +1,74 @@
 .todo {
+  position: relative;
+  min-height: var(--line);
+}
+
+/* A fixed-width strip pinned to the edge the row is dragged away from,
+   revealed as .swipeContent slides off it. Stops 1px short of the row's
+   full height so the ruled line under this row still shows through. */
+.swipeTrack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 88px;
+  height: calc(var(--line) - 1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--action-complete);
+}
+
+.done .swipeTrack {
+  left: auto;
+  right: 0;
+  background: var(--action-delete);
+}
+
+.swipeIcon {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Solid paper so the swipe track behind is hidden at rest, with the sheet's
+   red margin line redrawn on top so it keeps running through item rows. */
+.swipeContent {
+  position: relative;
   display: flex;
   align-items: flex-start;
-  min-height: var(--line);
+  height: calc(var(--line) - 1px);
+  background-color: var(--paper);
+  background-image: linear-gradient(
+    to right,
+    transparent calc(var(--gutter) - 1px),
+    var(--margin) calc(var(--gutter) - 1px),
+    var(--margin) calc(var(--gutter) + 1px),
+    transparent calc(var(--gutter) + 1px)
+  );
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Fills in while a long press is held, confirming the gesture is "charging"
+   toward the time-block action; fired on release, so this is just a cue. */
+.pressBadge {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%) scale(0.5);
+  opacity: 0;
+  font-size: 18px;
+  line-height: 1;
+  pointer-events: none;
+  transition: opacity 550ms ease, transform 550ms ease;
+}
+
+.pressing .pressBadge {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
 }
 
 .toggle {
@@ -23,7 +90,7 @@
   align-items: center;
   justify-content: center;
   width: var(--gutter);
-  height: var(--line);
+  height: calc(var(--line) - 1px);
 }
 
 .box::before {
@@ -36,7 +103,7 @@
 
 .text {
   padding: 0 12px;
-  line-height: var(--line);
+  line-height: calc(var(--line) - 1px);
   overflow-wrap: anywhere;
 }
 
@@ -74,7 +141,7 @@
 .delete {
   flex: none;
   width: var(--line);
-  height: var(--line);
+  height: calc(var(--line) - 1px);
   margin-right: 6px;
   border: 0;
   background: none;
