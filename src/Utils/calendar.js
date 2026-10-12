@@ -28,13 +28,48 @@ const buildIcs = (title, start, end) => {
   ].join("\r\n");
 };
 
+// Touch-primary (coarse pointer) stands in for "phone-like" here, since
+// that's the actual thing that matters: does this device have an OS share
+// sheet worth using, or is a browser tab the more natural outcome.
+const isTouchPrimary = () =>
+  typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches;
+
+const openGoogleCalendarTab = (title, start, end) => {
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title,
+    dates: `${toIcsDate(start)}/${toIcsDate(end)}`,
+  });
+  window.open(
+    `https://calendar.google.com/calendar/render?${params.toString()}`,
+    "_blank",
+    "noopener,noreferrer"
+  );
+};
+
+const downloadIcs = (ics) => {
+  const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "event.ics";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+};
+
 // Rounds up to the next BLOCK_MINUTES slot so the suggested block starts
-// "now-ish" rather than mid-interval. Hands off a standard .ics file rather
-// than a Google-specific URL, so the OS's own calendar chooser decides which
-// app opens it (Samsung Calendar, Google Calendar, Outlook, whatever the
-// user actually has set as default) instead of assuming Google — and since
-// this is a file share/download rather than a web navigation, it doesn't
-// get trapped inside the PWA's own webview the way an https:// link did.
+// "now-ish" rather than mid-interval.
+//
+// Desktop opens Google Calendar's quick-add page in a new tab — the most
+// useful outcome there, and avoids a flaky Web Share API path on platforms
+// where it's inconsistently supported. On a phone, a generated .ics file is
+// handed to the OS share sheet instead, since that's what lets the user
+// pick whatever calendar app they actually use (Samsung Calendar, Google
+// Calendar, etc.) rather than assuming Google. canShare() isn't used to
+// gate this — it can under-report support for less common file types,
+// which would block the real share attempt before it's even tried; share()
+// itself rejecting is a reliable enough signal to fall back from.
 export async function openTimeBlock(title) {
   const start = new Date();
   start.setSeconds(0, 0);
@@ -44,35 +79,24 @@ export async function openTimeBlock(title) {
   }
   const end = new Date(start.getTime() + BLOCK_MINUTES * 60 * 1000);
 
-  const ics = buildIcs(title, start, end);
-  const file = new File([ics], "event.ics", { type: "text/calendar" });
+  if (!isTouchPrimary()) {
+    openGoogleCalendarTab(title, start, end);
+    return;
+  }
 
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  const ics = buildIcs(title, start, end);
+
+  if (navigator.share) {
+    const file = new File([ics], "event.ics", { type: "text/calendar" });
     try {
       await navigator.share({ files: [file] });
       return;
     } catch (err) {
-      // A real cancel (the user closed the share sheet) shouldn't also
-      // trigger a download — but canShare() can say yes even when nothing
-      // on this OS/browser actually handles it, in which case share()
-      // rejects with no UI ever having appeared, and silently giving up
-      // here would just look like long-press does nothing. Fall through
-      // to the download in every case except a genuine cancel.
       if (err.name === "AbortError") {
-        return;
+        return; // the user closed the share sheet — respect that, no fallback
       }
     }
   }
 
-  // Reliable, always-visible fallback: a real file download (not a
-  // location.href navigation, which browsers can silently no-op for a
-  // non-renderable MIME type) the user can open with any calendar app.
-  const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "event.ics";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  downloadIcs(ics);
 }
