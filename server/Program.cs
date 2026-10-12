@@ -27,8 +27,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpContextAccessor();
+builder.Services
+    .AddMcpServer()
+    .WithHttpTransport()
+    .WithTools<NotepadTools>();
+
 var app = builder.Build();
 app.UseCors();
+
+// Scoped by the {notepadId} path segment the connector URL embeds — see NotepadTools.cs.
+app.MapGroup("/mcp/{notepadId}").MapMcp();
 
 // Schema is applied idempotently on every boot — no migration framework needed at this scale.
 await using (var initConn = await dataSource.OpenConnectionAsync())
