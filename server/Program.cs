@@ -1,4 +1,6 @@
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.RateLimiting;
 using Dapper;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -83,6 +85,48 @@ await using (var initConn = await dataSource.OpenConnectionAsync())
 }
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
+// Serves a real .ics download (not a client-side blob) so phone browsers
+// use their normal, well-tested "download complete -> open with a calendar
+// app" flow — most calendar apps register as file *viewers* for .ics, not
+// as Web Share API *targets*, so navigator.share with a file often finds
+// nothing to hand off to even when canShare() said yes.
+app.MapGet("/api/ics", (string title, string start, string end) =>
+{
+    if (!DateTimeOffset.TryParse(start, out var startDt) || !DateTimeOffset.TryParse(end, out var endDt))
+    {
+        return Results.BadRequest();
+    }
+
+    static string IcsDate(DateTimeOffset d) => d.UtcDateTime.ToString("yyyyMMdd'T'HHmmss'Z'");
+    static string EscapeIcsText(string text) =>
+        text.Replace("\\", "\\\\").Replace(",", "\\,").Replace(";", "\\;").Replace("\n", "\\n");
+
+    var uid = $"{Guid.NewGuid()}@easylists.app";
+    var ics = string.Join(
+        "\r\n",
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//EasyLists//EN",
+        "BEGIN:VEVENT",
+        $"UID:{uid}",
+        $"DTSTAMP:{IcsDate(DateTimeOffset.UtcNow)}",
+        $"DTSTART:{IcsDate(startDt)}",
+        $"DTEND:{IcsDate(endDt)}",
+        $"SUMMARY:{EscapeIcsText(title)}",
+        "END:VEVENT",
+        "END:VCALENDAR"
+    );
+
+    // A unique-ish filename per (title, time) avoids Chrome's "download
+    // again?" prompt when adding a second, different item right after.
+    var slug = Regex.Replace(title.ToLowerInvariant(), "[^a-z0-9]+", "-").Trim('-');
+    if (string.IsNullOrEmpty(slug)) slug = "event";
+    if (slug.Length > 40) slug = slug[..40];
+    var fileName = $"{slug}-{startDt.UtcDateTime:HHmm}.ics";
+
+    return Results.File(Encoding.UTF8.GetBytes(ics), "text/calendar", fileName);
+});
 
 app.MapPost("/api/notepads", async (NpgsqlDataSource db) =>
 {
