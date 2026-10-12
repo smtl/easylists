@@ -1,5 +1,8 @@
 using System.Security.Cryptography;
+using System.Threading.RateLimiting;
 using Dapper;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,7 +36,40 @@ builder.Services
     .WithHttpTransport()
     .WithTools<NotepadTools>();
 
+// Entropy alone (128-bit ids) already makes guessing infeasible, but this
+// bounds how fast any one client can even try — generous enough that real
+// usage (polling, a burst of MCP calls) never comes close to it.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 120,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 4,
+                QueueLimit = 0,
+            }));
+});
+
 var app = builder.Build();
+
+// The app only ever receives traffic through Railway's own edge proxy, so
+// the forwarded client IP can be trusted — without this, every request
+// would appear to come from the proxy's address and share one rate-limit
+// bucket.
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+};
+// Defaults only trust loopback; clear so Railway's proxy address is accepted.
+forwardedHeadersOptions.KnownIPNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
+app.UseRateLimiter();
 app.UseCors();
 
 // Scoped by the {notepadId} path segment the connector URL embeds — see NotepadTools.cs.
@@ -262,7 +298,11 @@ static class IdGenerator
     // 0/O and 1/l/I removed to avoid visually-ambiguous ids.
     private const string Alphabet = "23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ";
 
-    public static string NewId(int length = 12)
+    // 22 chars over this 57-char alphabet is ~128 bits of entropy — on par
+    // with a UUIDv4 — since this id is the only access credential a notepad
+    // has. Safe to bump now while no real data exists; old 12-char ids
+    // already issued stay valid (length isn't otherwise significant).
+    public static string NewId(int length = 22)
     {
         var chars = new char[length];
         for (var i = 0; i < length; i++)
