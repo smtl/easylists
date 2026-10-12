@@ -9,12 +9,21 @@ const prefersReducedMotion = () =>
   window.matchMedia &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+const TOAST_MS = 2000;
+
 const Todo = (props) => {
   const { todo } = props;
   const [striking, setStriking] = useState(false);
+  const [showCalendarToast, setShowCalendarToast] = useState(false);
   const timer = useRef(null);
+  const toastTimer = useRef(null);
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => {
+    return () => {
+      clearTimeout(timer.current);
+      clearTimeout(toastTimer.current);
+    };
+  }, []);
 
   const toggleHandler = () => {
     if (striking) {
@@ -32,10 +41,17 @@ const Todo = (props) => {
   // Open items swipe right to complete; done items swipe left to delete
   const swipeDirection = todo.done ? -1 : 1;
   const swipeCommit = todo.done ? () => props.deleteTodo(todo) : toggleHandler;
-  // Long-press an open item to time-block it on Google Calendar
+  // Long-press an open item to time-block it. The only feedback otherwise is
+  // a new browser tab (desktop) or a download notification (phone) — easy
+  // to miss, especially on mobile — so flash a brief in-app confirmation too.
   const longPressCommit = todo.done
     ? undefined
-    : () => openTimeBlock(todo.text);
+    : () => {
+        openTimeBlock(todo.text);
+        setShowCalendarToast(true);
+        clearTimeout(toastTimer.current);
+        toastTimer.current = setTimeout(() => setShowCalendarToast(false), TOAST_MS);
+      };
   const { drag, progress, swiping, pressing, handlers } = useSwipeAction(
     swipeDirection,
     swipeCommit,
@@ -99,6 +115,11 @@ const Todo = (props) => {
           </button>
         )}
       </div>
+      {showCalendarToast && (
+        <div className={styles.toast} role="status">
+          Added to calendar
+        </div>
+      )}
     </li>
   );
 };
