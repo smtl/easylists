@@ -51,12 +51,28 @@ export async function openTimeBlock(title) {
     try {
       await navigator.share({ files: [file] });
       return;
-    } catch {
-      return; // cancelled or unsupported mid-flight — don't also trigger the fallback
+    } catch (err) {
+      // A real cancel (the user closed the share sheet) shouldn't also
+      // trigger a download — but canShare() can say yes even when nothing
+      // on this OS/browser actually handles it, in which case share()
+      // rejects with no UI ever having appeared, and silently giving up
+      // here would just look like long-press does nothing. Fall through
+      // to the download in every case except a genuine cancel.
+      if (err.name === "AbortError") {
+        return;
+      }
     }
   }
 
+  // Reliable, always-visible fallback: a real file download (not a
+  // location.href navigation, which browsers can silently no-op for a
+  // non-renderable MIME type) the user can open with any calendar app.
   const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
-  window.location.href = url;
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "event.ics";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
