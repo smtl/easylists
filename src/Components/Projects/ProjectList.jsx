@@ -9,9 +9,10 @@ const ProjectList = (props) => {
         {props.projects.map((project) => {
           return (
             <Project
-              key={project.key}
+              key={project.id}
+              id={project.id}
               name={project.name}
-              active={project.name === props.activeProject}
+              active={project.id === props.activeProject}
               onSelect={props.onSelect}
             />
           );

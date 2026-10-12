@@ -6,13 +6,13 @@ const TodoList = (props) => {
   return (
     <>
       <UndoneTodos
-        activeProject={props.activeProject}
+        activeListId={props.activeListId}
         todos={props.todos}
         completeTodo={props.completeTodo}
       />
       <NewTodo addNewTodo={props.addNewTodo} />
       <DoneTodos
-        activeProject={props.activeProject}
+        activeListId={props.activeListId}
         todos={props.todos}
         completeTodo={props.completeTodo}
         deleteTodo={props.deleteTodo}

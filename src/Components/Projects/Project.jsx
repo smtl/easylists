@@ -19,7 +19,7 @@ const Project = (props) => {
       <button
         type="button"
         aria-current={props.active ? "page" : undefined}
-        onClick={() => props.onSelect(props.name)}
+        onClick={() => props.onSelect(props.id)}
       >
         {props.name}
       </button>

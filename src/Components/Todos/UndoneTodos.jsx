@@ -3,7 +3,7 @@ import styles from "./TodoList.module.css";
 
 const UndoneTodos = (props) => {
   const filteredUndoneTodos = props.todos
-    .filter((todo) => todo.project === props.activeProject && !todo.done)
+    .filter((todo) => todo.listId === props.activeListId && !todo.done)
     .sort((a, b) => {
       return (
         new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
@@ -18,7 +18,7 @@ const UndoneTodos = (props) => {
     <ul className={styles.items}>
       {filteredUndoneTodos.map((todo) => {
         return (
-          <Todo key={todo.key} completeTodo={props.completeTodo} todo={todo} />
+          <Todo key={todo.id} completeTodo={props.completeTodo} todo={todo} />
         );
       })}
     </ul>
