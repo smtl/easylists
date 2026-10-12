@@ -4,6 +4,8 @@ A shared todo list app with no accounts — share a list by sending its link, an
 
 **[easylists.app](https://easylists.app)**
 
+<img src="docs/screenshot.png" alt="A list in easylists, styled as a ruled notepad, with a mix of open and completed items" width="360">
+
 ## Features
 
 - **No accounts, just a link** — each "notepad" is identified by an unguessable URL; share it with whoever you want to collaborate with, and that link is the only credential it needs
