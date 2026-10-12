@@ -40,6 +40,14 @@
   color: var(--ink-soft);
 }
 
+.syncError {
+  margin: 0;
+  padding: 6px calc(var(--gutter) + 12px);
+  background: rgba(179, 38, 30, 0.12);
+  color: var(--action-delete);
+  font-size: 14px;
+}
+
 @media (min-width: 720px) {
   .desk {
     padding: 40px 24px;

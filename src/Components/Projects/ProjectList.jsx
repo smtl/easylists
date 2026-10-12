@@ -19,6 +19,7 @@ const ProjectList = (props) => {
         })}
         <NewProject addNewProject={props.addNewProject} />
       </ul>
+      {props.switcher}
     </nav>
   );
 };

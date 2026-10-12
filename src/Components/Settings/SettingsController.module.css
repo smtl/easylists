@@ -16,6 +16,10 @@
   min-height: var(--line);
 }
 
+.shareActions {
+  border-bottom: 1px solid var(--rule);
+}
+
 .actions button {
   height: 34px;
   padding: 0 16px;

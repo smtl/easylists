@@ -1,0 +1,64 @@
+.switcher {
+  position: relative;
+  flex: none;
+}
+
+.trigger {
+  width: var(--line);
+  height: var(--line);
+  margin: 0 4px 5px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--binding-ink);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 4px;
+  z-index: 3;
+  min-width: 180px;
+  padding: 6px;
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 0 8px 24px rgba(30, 43, 74, 0.35);
+}
+
+.list {
+  margin: 0 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.list button,
+.newNotepad {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink);
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.list button:hover,
+.newNotepad:hover {
+  background: rgba(30, 43, 74, 0.08);
+}
+
+.newNotepad {
+  color: var(--focus);
+  font-weight: 700;
+}

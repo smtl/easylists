@@ -3,6 +3,8 @@
   position: sticky;
   top: 0;
   z-index: 2;
+  display: flex;
+  align-items: flex-end;
   background: var(--binding);
   padding: calc(10px + env(safe-area-inset-top, 0px)) 0 0;
 }
@@ -10,6 +12,8 @@
 .tabs {
   display: flex;
   align-items: flex-end;
+  flex: 1;
+  min-width: 0;
   gap: 2px;
   margin: 0;
   padding: 0 8px;
