@@ -223,6 +223,27 @@ export default function useNotepad(notepadId) {
     [mutate]
   );
 
+  // Un-checks every done item in a list for reuse (e.g. the same packing
+  // checklist every outing) without touching the items themselves.
+  const resetList = useCallback(
+    (listId) => {
+      let previous;
+      mutate(
+        () => {
+          setTodos((prev) => {
+            previous = prev;
+            return prev.map((t) =>
+              t.listId === listId && t.done ? { ...t, done: false, completedDate: null } : t
+            );
+          });
+          return () => setTodos(previous);
+        },
+        () => api.resetList(listId)
+      );
+    },
+    [mutate]
+  );
+
   return {
     lists,
     todos,
@@ -234,5 +255,6 @@ export default function useNotepad(notepadId) {
     addTodo,
     toggleTodo,
     deleteTodo,
+    resetList,
   };
 }

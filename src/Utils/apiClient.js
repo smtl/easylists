@@ -42,6 +42,10 @@ export function deleteList(listId) {
   return request(`/api/lists/${listId}`, { method: "DELETE" });
 }
 
+export function resetList(listId) {
+  return request(`/api/lists/${listId}/reset`, { method: "POST" });
+}
+
 export function createTodo(listId, text) {
   return request(`/api/lists/${listId}/todos`, {
     method: "POST",

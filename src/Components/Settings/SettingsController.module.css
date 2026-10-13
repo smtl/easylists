@@ -16,7 +16,8 @@
   min-height: var(--line);
 }
 
-.shareActions {
+/* Divider under a non-final section in the settings panel */
+.sectionDivider {
   border-bottom: 1px solid var(--rule);
 }
 

@@ -187,6 +187,23 @@ app.MapDelete("/api/lists/{listId}", async (string listId, NpgsqlDataSource db) 
     return deleted == 0 ? Results.NotFound() : Results.NoContent();
 });
 
+// Un-checks every done item in a list, for a reusable checklist (e.g. the
+// same packing list every outing) rather than a one-shot todo list. Items
+// and their text are untouched — only done/completed_at are cleared.
+app.MapPost("/api/lists/{listId}/reset", async (string listId, NpgsqlDataSource db) =>
+{
+    await using var conn = await db.OpenConnectionAsync();
+    var listExists = await conn.QuerySingleOrDefaultAsync<string>(
+        "SELECT id FROM lists WHERE id = @listId", new { listId });
+    if (listExists is null) return Results.NotFound();
+
+    var resetCount = await conn.ExecuteAsync(
+        "UPDATE todos SET done = false, completed_at = NULL WHERE list_id = @listId AND done = true",
+        new { listId });
+
+    return Results.Ok(new { resetCount });
+});
+
 app.MapPost("/api/lists/{listId}/todos", async (string listId, CreateTodoRequest body, NpgsqlDataSource db) =>
 {
     await using var conn = await db.OpenConnectionAsync();

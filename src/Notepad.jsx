@@ -25,6 +25,7 @@ const Notepad = () => {
     addTodo,
     toggleTodo,
     deleteTodo,
+    resetList,
   } = useNotepad(notepadId);
 
   const [savedActiveListId, setActiveListId] = useStickyState(
@@ -117,7 +118,9 @@ const Notepad = () => {
     setActiveListId(remaining.length > 0 ? remaining[0].id : null);
   };
 
-  const itemCount = todos.filter((t) => t.listId === activeListId).length;
+  const activeListTodos = todos.filter((t) => t.listId === activeListId);
+  const itemCount = activeListTodos.length;
+  const doneCount = activeListTodos.filter((t) => t.done).length;
   const shareUrl = `${window.location.origin}/${notepadId}`;
 
   return (
@@ -148,7 +151,9 @@ const Notepad = () => {
                 <SettingsContainer
                   projectName={activeList.name}
                   itemCount={itemCount}
+                  doneCount={doneCount}
                   shareUrl={shareUrl}
+                  onResetProject={() => resetList(activeListId)}
                   onDeleteProject={onDeleteProject}
                   onClose={() => setSettingsActive(false)}
                 />

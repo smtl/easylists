@@ -25,7 +25,7 @@ const ShareNotepad = (props) => {
   };
 
   return (
-    <div className={`${styles.actions} ${styles.shareActions}`}>
+    <div className={`${styles.actions} ${styles.sectionDivider}`}>
       <button type="button" className={styles.secondary} onClick={share}>
         {copied ? "Link copied" : "Share this notepad"}
       </button>
