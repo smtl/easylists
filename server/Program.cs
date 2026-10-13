@@ -157,7 +157,8 @@ app.MapPost("/api/notepads/{notepadId}/lists", async (string notepadId, CreateLi
     if (exists is null) return Results.NotFound();
 
     var nextIndex = await conn.QuerySingleAsync<double>(
-        "SELECT COALESCE(MAX(order_index), -1) + 1 FROM lists WHERE notepad_id = @notepadId", new { notepadId });
+        "SELECT COALESCE(MAX(order_index), -1) + 1 FROM lists WHERE notepad_id = @notepadId AND deleted_at IS NULL",
+        new { notepadId });
 
     var listId = IdGenerator.NewId();
     var row = await conn.QuerySingleAsync(
@@ -173,17 +174,23 @@ app.MapPatch("/api/lists/{listId}", async (string listId, UpdateListRequest body
 {
     await using var conn = await db.OpenConnectionAsync();
     var row = await conn.QuerySingleOrDefaultAsync(
-        @"UPDATE lists SET name = COALESCE(@name, name) WHERE id = @listId
+        @"UPDATE lists SET name = COALESCE(@name, name) WHERE id = @listId AND deleted_at IS NULL
           RETURNING id, name, order_index AS ""OrderIndex""",
         new { listId, name = body.Name });
     if (row is null) return Results.NotFound();
     return Results.Ok(new { row.id, row.name, row.OrderIndex });
 });
 
+// Soft delete: marks the row rather than removing it, so an accidental
+// delete can be manually undone in the database (clear deleted_at) rather
+// than being gone for good. Todos aren't also marked — they're already
+// hidden as soon as their parent list is, and clearing just the list's
+// deleted_at brings everything back together.
 app.MapDelete("/api/lists/{listId}", async (string listId, NpgsqlDataSource db) =>
 {
     await using var conn = await db.OpenConnectionAsync();
-    var deleted = await conn.ExecuteAsync("DELETE FROM lists WHERE id = @listId", new { listId });
+    var deleted = await conn.ExecuteAsync(
+        "UPDATE lists SET deleted_at = now() WHERE id = @listId AND deleted_at IS NULL", new { listId });
     return deleted == 0 ? Results.NotFound() : Results.NoContent();
 });
 
@@ -194,11 +201,12 @@ app.MapPost("/api/lists/{listId}/reset", async (string listId, NpgsqlDataSource 
 {
     await using var conn = await db.OpenConnectionAsync();
     var listExists = await conn.QuerySingleOrDefaultAsync<string>(
-        "SELECT id FROM lists WHERE id = @listId", new { listId });
+        "SELECT id FROM lists WHERE id = @listId AND deleted_at IS NULL", new { listId });
     if (listExists is null) return Results.NotFound();
 
     var resetCount = await conn.ExecuteAsync(
-        "UPDATE todos SET done = false, completed_at = NULL WHERE list_id = @listId AND done = true",
+        @"UPDATE todos SET done = false, completed_at = NULL
+          WHERE list_id = @listId AND done = true AND deleted_at IS NULL",
         new { listId });
 
     return Results.Ok(new { resetCount });
@@ -208,11 +216,12 @@ app.MapPost("/api/lists/{listId}/todos", async (string listId, CreateTodoRequest
 {
     await using var conn = await db.OpenConnectionAsync();
     var listExists = await conn.QuerySingleOrDefaultAsync<string>(
-        "SELECT id FROM lists WHERE id = @listId", new { listId });
+        "SELECT id FROM lists WHERE id = @listId AND deleted_at IS NULL", new { listId });
     if (listExists is null) return Results.NotFound();
 
     var nextIndex = await conn.QuerySingleAsync<double>(
-        "SELECT COALESCE(MAX(order_index), -1) + 1 FROM todos WHERE list_id = @listId", new { listId });
+        "SELECT COALESCE(MAX(order_index), -1) + 1 FROM todos WHERE list_id = @listId AND deleted_at IS NULL",
+        new { listId });
 
     var todoId = IdGenerator.NewId();
     var row = await conn.QuerySingleAsync(
@@ -240,7 +249,7 @@ app.MapPatch("/api/todos/{todoId}", async (string todoId, UpdateTodoRequest body
               WHEN @done = false THEN NULL
               ELSE completed_at
             END
-          WHERE id = @todoId
+          WHERE id = @todoId AND deleted_at IS NULL
           RETURNING id, text, done, order_index AS ""OrderIndex"", created_at AS ""CreatedAt"", completed_at AS ""CompletedAt""",
         new { todoId, text = body.Text, done = body.Done });
 
@@ -248,10 +257,12 @@ app.MapPatch("/api/todos/{todoId}", async (string todoId, UpdateTodoRequest body
     return Results.Ok(new TodoResponse(row.id, row.text, row.done, row.OrderIndex, row.CreatedAt, row.CompletedAt));
 });
 
+// Soft delete — see the list delete endpoint above for why.
 app.MapDelete("/api/todos/{todoId}", async (string todoId, NpgsqlDataSource db) =>
 {
     await using var conn = await db.OpenConnectionAsync();
-    var deleted = await conn.ExecuteAsync("DELETE FROM todos WHERE id = @todoId", new { todoId });
+    var deleted = await conn.ExecuteAsync(
+        "UPDATE todos SET deleted_at = now() WHERE id = @todoId AND deleted_at IS NULL", new { todoId });
     return deleted == 0 ? Results.NotFound() : Results.NoContent();
 });
 
@@ -264,14 +275,14 @@ static async Task<NotepadResponse> LoadNotepadAsync(NpgsqlConnection conn, strin
 
     var lists = (await conn.QueryAsync(
         @"SELECT id, name, order_index AS ""OrderIndex"" FROM lists
-          WHERE notepad_id = @notepadId ORDER BY order_index",
+          WHERE notepad_id = @notepadId AND deleted_at IS NULL ORDER BY order_index",
         new { notepadId })).ToList();
 
     var listIds = lists.Select(l => (string)l.id).ToList();
     var todosByList = (await conn.QueryAsync(
         @"SELECT id, list_id AS ""ListId"", text, done, order_index AS ""OrderIndex"",
                  created_at AS ""CreatedAt"", completed_at AS ""CompletedAt""
-          FROM todos WHERE list_id = ANY(@listIds) ORDER BY order_index",
+          FROM todos WHERE list_id = ANY(@listIds) AND deleted_at IS NULL ORDER BY order_index",
         new { listIds }))
         .GroupBy(t => (string)t.ListId)
         .ToDictionary(g => g.Key, g => g.ToList());

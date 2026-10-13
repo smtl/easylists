@@ -35,13 +35,13 @@ public class NotepadTools
         var notepadId = NotepadId;
 
         var lists = (await conn.QueryAsync(
-            @"SELECT id, name FROM lists WHERE notepad_id = @notepadId ORDER BY order_index",
+            @"SELECT id, name FROM lists WHERE notepad_id = @notepadId AND deleted_at IS NULL ORDER BY order_index",
             new { notepadId })).ToList();
 
         var listIds = lists.Select(l => (string)l.id).ToList();
         var todosByList = (await conn.QueryAsync(
             @"SELECT id, list_id AS ""ListId"", text, done FROM todos
-              WHERE list_id = ANY(@listIds) ORDER BY order_index",
+              WHERE list_id = ANY(@listIds) AND deleted_at IS NULL ORDER BY order_index",
             new { listIds }))
             .GroupBy(t => (string)t.ListId)
             .ToDictionary(g => g.Key, g => g.ToList());
@@ -71,7 +71,8 @@ public class NotepadTools
         var notepadId = NotepadId;
 
         var existing = await conn.QuerySingleOrDefaultAsync(
-            @"SELECT id, name FROM lists WHERE notepad_id = @notepadId AND lower(name) = lower(@listName)",
+            @"SELECT id, name FROM lists
+              WHERE notepad_id = @notepadId AND deleted_at IS NULL AND lower(name) = lower(@listName)",
             new { notepadId, listName });
 
         string listId;
@@ -84,7 +85,7 @@ public class NotepadTools
         else
         {
             var nextListIndex = await conn.QuerySingleAsync<double>(
-                "SELECT COALESCE(MAX(order_index), -1) + 1 FROM lists WHERE notepad_id = @notepadId",
+                "SELECT COALESCE(MAX(order_index), -1) + 1 FROM lists WHERE notepad_id = @notepadId AND deleted_at IS NULL",
                 new { notepadId });
             listId = IdGenerator.NewId();
             await conn.ExecuteAsync(
@@ -94,7 +95,7 @@ public class NotepadTools
         }
 
         var nextTodoIndex = await conn.QuerySingleAsync<double>(
-            "SELECT COALESCE(MAX(order_index), -1) + 1 FROM todos WHERE list_id = @listId",
+            "SELECT COALESCE(MAX(order_index), -1) + 1 FROM todos WHERE list_id = @listId AND deleted_at IS NULL",
             new { listId });
 
         foreach (var text in items)
