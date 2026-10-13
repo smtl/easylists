@@ -153,7 +153,10 @@ const Notepad = () => {
                   itemCount={itemCount}
                   doneCount={doneCount}
                   shareUrl={shareUrl}
-                  onResetProject={() => resetList(activeListId)}
+                  onResetProject={() => {
+                    resetList(activeListId);
+                    setSettingsActive(false);
+                  }}
                   onDeleteProject={onDeleteProject}
                   onClose={() => setSettingsActive(false)}
                 />
