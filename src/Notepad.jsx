@@ -10,6 +10,7 @@ import useNotepad from "./Hooks/useNotepad";
 import useNotepadBookmarks from "./Hooks/useNotepadBookmarks";
 import SettingsContainer from "./Components/Settings/SettingsContainer";
 import { createNotepad } from "./Utils/apiClient";
+import { setManifestForNotepad } from "./Utils/dynamicManifest";
 
 const Notepad = () => {
   const { notepadId } = useParams();
@@ -42,6 +43,15 @@ const Notepad = () => {
       touchBookmark(notepadId);
     }
   }, [notepadId, loading, notFound, touchBookmark]);
+
+  // Keeps the manifest's start_url in sync with whichever notepad is open,
+  // so "Add to Home Screen" (iOS in particular) installs an icon that opens
+  // back to this notepad instead of a fixed app-wide URL.
+  useEffect(() => {
+    if (!loading && !notFound) {
+      setManifestForNotepad(notepadId);
+    }
+  }, [notepadId, loading, notFound]);
 
   if (notFound) {
     return (
